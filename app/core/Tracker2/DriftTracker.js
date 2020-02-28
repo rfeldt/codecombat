@@ -29,6 +29,12 @@ function loadDrift () {
 }
 
 export default class DriftTracker extends BaseTracker {
+  constructor (store) {
+    super()
+
+    this.store = store
+  }
+
   get drift () {
     return this.driftApi
   }
@@ -40,7 +46,6 @@ export default class DriftTracker extends BaseTracker {
       this.driftApi = api
 
       this.initDriftOnLoad()
-
       this.onInitializeSuccess()
     })
   }
@@ -58,6 +63,26 @@ export default class DriftTracker extends BaseTracker {
   }
 
   async identify (traits = {}) {
+    await this.initializationComplete
+
+    if (this.store.getters['me/isAnonymous']) {
+      return
+    }
+
+    const { me } = this.store.state
+
+    const {
+      id,
+      ...meAttrs
+    } = me
+
+    await this.driftApi.identify(
+      me._id.toString(),
+      {
+        ...meAttrs,
+        ...traits
+      }
+    )
   }
 }
 
