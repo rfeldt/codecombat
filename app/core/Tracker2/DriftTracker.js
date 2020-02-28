@@ -76,13 +76,26 @@ export default class DriftTracker extends BaseTracker {
       ...meAttrs
     } = me
 
-    await this.driftApi.identify(
+    await window.drift.identify(
       me._id.toString(),
       {
         ...meAttrs,
         ...traits
       }
     )
+  }
+
+  async trackPageView (includeIntegrations = {}) {
+    await this.initializationComplete
+
+    const url = `/${Backbone.history.getFragment()}`
+    await window.drift.page(url)
+  }
+
+  async trackEvent (action, properties = {}) {
+    await this.initializationComplete
+
+    await window.drift.track(action, properties)
   }
 }
 
